@@ -58,7 +58,7 @@ public class MirlonBmp extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE)
+                .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 308, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -74,30 +74,42 @@ public class MirlonBmp extends javax.swing.JFrame {
     
     JLabel jLabel1 = new JLabel();
     JLabel jLabel2 = new JLabel();
+    
+    JPanel btnPanel = new JPanel();
+    
+    JButton prevBtn = new JButton();
     JButton nxtBtn = new JButton();
+    JButton exitBtn = new JButton();
+    
     JFrame editorFrame = new JFrame("Image Viewer");
+    
     int flag = 0;
     
     
     
     public BufferedImage turnImgGrayscale(BufferedImage image){
+        
         BufferedImage result = new BufferedImage(
                     image.getWidth(),
                     image.getHeight(),
                     BufferedImage.TYPE_INT_RGB);
+        
         Graphics2D graphic = result.createGraphics();
         graphic.drawImage(image, 0, 0, Color.WHITE, null);
         
         for (int i = 0; i < result.getHeight(); i++) {
             for (int j = 0; j < result.getWidth(); j++) {
                 Color c = new Color(result.getRGB(j, i));
+                
                 int red = (int) (c.getRed() * 0.299);
                 int green = (int) (c.getGreen() * 0.587);
                 int blue = (int) (c.getBlue() * 0.114);
+                
                 Color newColor = new Color(
                         red + green + blue,
                         red + green + blue,
                         red + green + blue);
+                
                 result.setRGB(j, i, newColor.getRGB());
             }
         }
@@ -106,10 +118,12 @@ public class MirlonBmp extends javax.swing.JFrame {
     }
     
     public BufferedImage applyDithering(BufferedImage inpImage){
+        
         BufferedImage image = new BufferedImage(
                     inpImage.getWidth(),
                     inpImage.getHeight(),
                     BufferedImage.TYPE_INT_RGB);
+        
         Graphics2D graphic = image.createGraphics();
         graphic.drawImage(inpImage, 0, 0, Color.WHITE, null);
         
@@ -117,12 +131,40 @@ public class MirlonBmp extends javax.swing.JFrame {
         Color newBlack = new Color(0,0,0);
         Color newWhite = new Color(255,255,255);
                 
-        for (int i = 0; i < image.getHeight(); i++) {
-            for (int j = 0; j < image.getWidth(); j++) {
-                Color c = new Color(image.getRGB(j, i));
+        for (int i = 0; i < image.getWidth(); i+=2) {   // Using a 2x2 matrix for dithering
+            for (int j = 0; j < image.getHeight(); j+=2) {
                 
+                Color c1 = new Color(image.getRGB(i, j));
+                Color c2 = new Color(image.getRGB(i+1, j));
+                Color c3 = new Color(image.getRGB(i, j+1));
+                Color c4 = new Color(image.getRGB(i+1, j+1));
                 
-//                image.setRGB(j, i, newColor.getRGB());
+                var p1 = c1.getRed();
+                var p2 = c2.getRed();
+                var p3 = c3.getRed();
+                var p4 = c4.getRed();
+                
+                var avg = 256 - (p1+p2+p3+p4)/4;
+                
+                if(avg > 0)
+                    image.setRGB(i+1, j+1, newBlack.getRGB());
+                else
+                    image.setRGB(i+1, j+1, newWhite.getRGB());
+                
+                if(avg > 64)
+                    image.setRGB(i, j, newBlack.getRGB());
+                else
+                    image.setRGB(i, j, newWhite.getRGB());
+                
+                if(avg > 128)
+                    image.setRGB(i+1, j, newBlack.getRGB());
+                else
+                    image.setRGB(i+1, j, newWhite.getRGB());
+                
+                if(avg > 192)
+                    image.setRGB(i, j+1, newBlack.getRGB());
+                else
+                    image.setRGB(i, j+1, newWhite.getRGB());
             }
         }
         
@@ -131,63 +173,174 @@ public class MirlonBmp extends javax.swing.JFrame {
    
     
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        int returnVal = fileDialog.showOpenDialog(this);
+        
+        System.out.println(evt);
+        
+        prevBtn.setText("<");
         nxtBtn.setText(">");
+        exitBtn.setText("x");
+        
+        btnPanel.setLayout(new BoxLayout(btnPanel, BoxLayout.Y_AXIS));
+        
+        btnPanel.add(exitBtn);
+        btnPanel.add(prevBtn);
+        btnPanel.add(nxtBtn);
+        
+        int returnVal = fileDialog.showOpenDialog(this);
+        
         editorFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
      
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileDialog.getSelectedFile();
+            
             System.out.print(" > Selected File: ");
             System.out.println(selectedFile.getAbsolutePath());
+            
             try{
                 System.out.print(" > Original | Grayscale | Flag = ");
                 System.out.println(flag);
+                
                 BufferedImage selImg = ImageIO.read(selectedFile);
                 ImageIcon imageIcon = new ImageIcon(selImg);
+                
                 BufferedImage grayImg = turnImgGrayscale(selImg);
                 ImageIcon grayImgIcon = new ImageIcon(grayImg);
-                System.out.println(grayImg.getRGB(100,100 ));
+                
+                BufferedImage ditheredImg = applyDithering(grayImg);
+                ImageIcon ditheredIcon = new ImageIcon(ditheredImg);
+                
+                BufferedImage lvldImg = applyDithering(grayImg);
+                ImageIcon lvldIcon = new ImageIcon(lvldImg);
+                
+//                File of = new File("C:\\Users\\Mr.Rathod\\Documents\\gray.bmp");
+//                ImageIO.write(grayImg, "bmp", of);
+
+//                Color exCol = new Color(grayImg.getRGB(100,100 ));
+//                System.out.print("R:");
+//                System.out.println(exCol.getRed());
+//                System.out.print("G:");
+//                System.out.println(exCol.getGreen());
+//                System.out.print("B:");
+//                System.out.println(exCol.getBlue());
+
                 this.setVisible(false);
+                
+                editorFrame.setTitle("Image Viewer - Original | Grayscale (1)");
+                
                 jLabel1.setIcon(imageIcon);
                 jLabel2.setIcon(grayImgIcon);
+                
                 editorFrame.setLayout(new FlowLayout());
+                
                 editorFrame.getContentPane().add(jLabel1);
                 editorFrame.getContentPane().add(jLabel2);
-                editorFrame.getContentPane().add(nxtBtn);
+                
+                editorFrame.getContentPane().add(btnPanel);
+
+//                editorFrame.getContentPane().add(nxtBtn);
+//                editorFrame.getContentPane().add(exitBtn);
+                
                 editorFrame.pack();
+                
                 editorFrame.setLocationRelativeTo(null);
+                
                 editorFrame.setVisible(true);
-                nxtBtn.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        flag++;
-                        System.out.print(" > Next Button Pressed. Flag = ");
-                        System.out.println(flag);
-                        switch(flag){
-                            case 1 -> {
-                                System.out.print(" > Grayscale | Ordered Dithering | Flag = ");
-                                System.out.println(flag);
-                                jLabel1.setIcon(grayImgIcon);
-                                jLabel2.setIcon(imageIcon);
-                            }
-                            case 2 -> {
-                                System.out.print(" > Original | Auto Level | Flag = ");
-                                System.out.println(flag);
-                            }
-                            case 3 -> {
-                                System.out.println(" > Flag = 3 | Exiting.");
-                                System.exit(0);
-                            }
+                
+                nxtBtn.addActionListener((ActionEvent e) -> {
+                    flag++;
+                    
+                    System.out.print(" > Next Button Pressed. Flag = ");
+                    System.out.println(flag);
+                    
+                    switch(flag){
+                        case 1 -> {
+                            System.out.print(" > Grayscale | Ordered Dithering | Flag = ");
+                            System.out.println(flag);
+                            
+                            editorFrame.setTitle("Image Viewer - Grayscale | Dithered (2)");
+                            
+                            jLabel1.setIcon(grayImgIcon);
+                            jLabel2.setIcon(ditheredIcon);
+                        }
+                        case 2 -> {
+                            System.out.print(" > Original | Auto Level | Flag = ");
+                            System.out.println(flag);
+                            
+                            editorFrame.setTitle("Image Viewer - Original | Leveled (3)");
+                            
+                            jLabel1.setIcon(imageIcon);
+                            jLabel2.setIcon(lvldIcon);
+                        }
+                        case 3 -> {
+                            System.out.println(" > Flag = 3 | Resetting to 0.");
+                            
+                            flag = 0;
+                            
+                            editorFrame.setTitle("Image Viewer - Original | Grayscale (1)");
+                            
+                            jLabel1.setIcon(imageIcon);
+                            jLabel2.setIcon(grayImgIcon);
                         }
                     }
                 });
+                
+                prevBtn.addActionListener((ActionEvent e) -> {
+                    flag--;
+                    
+                    System.out.print(" > Previous Button Pressed. Flag = ");
+                    System.out.println(flag);
+                    
+                    switch(flag){
+                        case -1 -> {
+                            System.out.println(" > Flag = -1 | Resetting to 2.");
+                            
+                            flag = 2;
+                            
+                            editorFrame.setTitle("Image Viewer - Original | Leveled (3)");
+                            
+                            jLabel1.setIcon(imageIcon);
+                            jLabel2.setIcon(lvldIcon);
+                        }
+                        case 0 -> {
+                            System.out.println(" > Flag = 0 | Resetting.");
+                   
+                            editorFrame.setTitle("Image Viewer - Original | Grayscale (1)");
+                            
+                            jLabel1.setIcon(imageIcon);
+                            jLabel2.setIcon(grayImgIcon);
+                        }
+                        case 1 -> {
+                            System.out.print(" > Grayscale | Ordered Dithering | Flag = ");
+                            System.out.println(flag);
+                            
+                            editorFrame.setTitle("Image Viewer - Grayscale | Dithered (2)");
+                            
+                            jLabel1.setIcon(grayImgIcon);
+                            jLabel2.setIcon(ditheredIcon);
+                        }
+                        case 2 -> {
+                            System.out.print(" > Original | Auto Level | Flag = ");
+                            System.out.println(flag);
+                            
+                            editorFrame.setTitle("Image Viewer - Original | Leveled (3)");
+                            
+                            jLabel1.setIcon(imageIcon);
+                            jLabel2.setIcon(lvldIcon);
+                        }
+                    }
+                });
+                
+                exitBtn.addActionListener((ActionEvent e) -> {
+                    System.out.println(" > Exit Button Pressed.");
+                    System.exit(0);
+                });
+                
             } catch(IOException e){
                 System.out.println(" > Unable to Read the Input Image.");
             }
         } else {
             System.out.println(" > File access cancelled by user.");
         }
-        // TODO add your handling code here:
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
@@ -219,10 +372,8 @@ public class MirlonBmp extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new MirlonBmp().setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            new MirlonBmp().setVisible(true);
         });
     }
 
