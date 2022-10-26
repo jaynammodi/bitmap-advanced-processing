@@ -12,7 +12,6 @@ import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.imageio.ImageIO;
 import javax.swing.*;
-
 /**
  *
  * @author Mr.Rathod
@@ -171,6 +170,95 @@ public class MirlonBmp extends javax.swing.JFrame {
         return image;
     }
    
+    public BufferedImage applyLevels(BufferedImage image){
+        
+        int N = image.getWidth();
+        int M = image.getHeight();
+        int totPix = N*M;
+        
+        BufferedImage result = new BufferedImage(
+                    image.getWidth(),
+                    image.getHeight(),
+                    BufferedImage.TYPE_INT_RGB);
+        
+        Graphics2D graphic = result.createGraphics();
+        graphic.drawImage(image, 0, 0, Color.WHITE, null);
+        
+        // Creating Histogram & Cumulative Histogram Array
+        // Red
+        int H_r[] = new int[256];
+        int CH_r[] = new int[256];
+        // Green
+        int H_g[] = new int[256];
+        int CH_g[] = new int[256];
+        // Blue
+        int H_b[] = new int[256];
+        int CH_b[] = new int[256];
+        
+        // Creating Threshold Array
+        float T_r[] = new float[256];
+        float T_g[] = new float[256];
+        float T_b[] = new float[256];
+        
+        // Filling the array
+        for (int i = 0; i < image.getWidth(); i++) {
+            for (int j = 0; j < image.getHeight(); j++) {
+                
+                Color pxCol = new Color(image.getRGB(i,j ));
+                
+                // For Red Channel
+                int r = pxCol.getRed();
+                int g = pxCol.getGreen();
+                int b = pxCol.getBlue();
+                
+                System.out.println(" > Coords : " + "(" + i + "," + j + ") | R: " + r + " | G: " + g + " | B: " + b);
+                
+                // Incrementing values in Histogram Array
+                H_r[r] += 1;
+                H_g[g] += 1;
+                H_b[b] += 1;
+            }
+        }
+        
+        // Developing Cumulative Histogram
+        CH_r[0] = H_r[0];
+        CH_g[0] = H_g[0];
+        CH_b[0] = H_b[0];
+
+        
+        for(int x = 1; x < 256; x++){
+            CH_r[x] = CH_r[x-1] + H_r[x];
+            CH_g[x] = CH_g[x-1] + H_g[x];
+            CH_b[x] = CH_b[x-1] + H_b[x];            
+        }
+        
+        // Calculating threshold array
+        for(int i = 0; i < 256; i++){
+            T_r[i] = (float)((CH_r[i] * 255.0)/(float)totPix);
+            T_g[i] = (float)((CH_g[i] * 255.0)/(float)totPix);
+            T_b[i] = (float)((CH_b[i] * 255.0)/(float)totPix);            
+        }
+        
+        for(int i = 0; i < result.getWidth(); i++){
+            for(int j = 0; j < result.getHeight(); j++){
+                
+                Color pxCol = new Color(image.getRGB(i,j ));
+                
+                int r = pxCol.getRed();
+                int g = pxCol.getGreen();
+                int b = pxCol.getBlue();
+                
+                int rVal = (int) T_r[r];
+                int gVal = (int) T_g[g];
+                int bVal = (int) T_b[b];
+                
+                Color newCol = new Color(rVal, gVal, bVal);
+                result.setRGB(i, j, newCol.getRGB());
+            }
+        }
+        
+        return result;
+    }
     
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         
@@ -209,7 +297,7 @@ public class MirlonBmp extends javax.swing.JFrame {
                 BufferedImage ditheredImg = applyDithering(grayImg);
                 ImageIcon ditheredIcon = new ImageIcon(ditheredImg);
                 
-                BufferedImage lvldImg = applyDithering(grayImg);
+                BufferedImage lvldImg = applyLevels(selImg);
                 ImageIcon lvldIcon = new ImageIcon(lvldImg);
                 
 //                File of = new File("C:\\Users\\Mr.Rathod\\Documents\\gray.bmp");
