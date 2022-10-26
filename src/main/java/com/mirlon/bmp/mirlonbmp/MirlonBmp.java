@@ -4,6 +4,8 @@
  */
 package com.mirlon.bmp.mirlonbmp;
 
+// Importing all Necessary Libraries
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -14,7 +16,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 /**
  *
- * @author Mr.Rathod
+ * @author Jaynam Modi (https://github.com/jaynammodi/bitmap-advanced-processing)
  */
 public class MirlonBmp extends javax.swing.JFrame {
 
@@ -71,80 +73,134 @@ public class MirlonBmp extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
     
+    // Initialise components
+    
+    // Labels to Display ImageIcons
     JLabel jLabel1 = new JLabel();
     JLabel jLabel2 = new JLabel();
     
+    // Panel to hold Action Buttons - < , > and X
     JPanel btnPanel = new JPanel();
     
+    // Buttons for Next, Previous and Exit
     JButton prevBtn = new JButton();
     JButton nxtBtn = new JButton();
     JButton exitBtn = new JButton();
     
+    // Main Container to Display it all
     JFrame editorFrame = new JFrame("Image Viewer");
     
+    // Flag to know which step we're on
+    // 0 - Original | Grayscale
+    // 1 - Grayscale | Dithered
+    // 2 - Original | Equalised
     int flag = 0;
     
-    
-    
-    public BufferedImage turnImgGrayscale(BufferedImage image){
-        
+    // Public Functions for all the required Operations    
+    public BufferedImage applyGrayscale(BufferedImage image){
+        // Public method that takes an input BufferedImage and returns a Grayscale version of the same class
+
+        // Initialising the result image with same dimensions and attributes
         BufferedImage result = new BufferedImage(
                     image.getWidth(),
                     image.getHeight(),
                     BufferedImage.TYPE_INT_RGB);
         
+        // Drawing the original raster onto the resultant BufferImage
         Graphics2D graphic = result.createGraphics();
         graphic.drawImage(image, 0, 0, Color.WHITE, null);
         
+        // Iterating over each pixel to Convert it to corresponding shade of gray
         for (int i = 0; i < result.getHeight(); i++) {
             for (int j = 0; j < result.getWidth(); j++) {
                 Color c = new Color(result.getRGB(j, i));
                 
+                // Getting new RGB Values for grayscale
                 int red = (int) (c.getRed() * 0.299);
                 int green = (int) (c.getGreen() * 0.587);
                 int blue = (int) (c.getBlue() * 0.114);
                 
+                // Generating new color to get RGB
                 Color newColor = new Color(
                         red + green + blue,
                         red + green + blue,
                         red + green + blue);
                 
+                // Setting the new RGB to the resultatnt ImageBuffer
                 result.setRGB(j, i, newColor.getRGB());
             }
         }
-        
+        // Return resultant BufferedImage
         return result;
     }
     
     public BufferedImage applyDithering(BufferedImage inpImage){
+        /*
         
+        Public function to apply 2x2 Ordered 1-bit Dithering by presuming 2*2 matrices all over the image, 
+        normalising the RGB values by averaging them between the 4 pixels and using the average value to set new pixels
+        
+        +-------+-------+
+        | > 64  | > 128 |  <- this matrix shows the technique used to set each pixel to black or white,
+        +-------+-------+     let black_prcnt = 256 - avg (calculated already)
+        | > 192 |  > 0  |     if black_prcnt > cell_value -> set the pixel to black
+        +-------+-------+     > Explanation :
+        
+        This way, we divide the cell of 4 pixels into 6 categories of gray,
+        
+         > 0       -> 0%   black | 100% white
+         > 0-64    -> 25%  black |  75% white
+         > 64-128  -> 50%  black |  50% white
+         > 128-192 -> 75%  black |  25% white
+         > 192-255 -> 100% black |   0% white
+        
+        For example, if the black_prcnt value ends up being 170 for instance, the resultant matrix with the pixels set to black would be:
+        
+        +++++++++++++++++
+        +++64++++++128+++  <- this matrix shows the resultant of setting 1-bit pixels to black or white,
+        +++++++++++++++++     based on the rule mentioned above -> 
+        |  192  ++++0++++     black_prcnt > cell value => black
+        +-------+++++++++     else white 
+        
+         => this results in 3/4 pixels being black and one being white which when zoomed out, looks 75% gray.
+        
+        */
+        
+        // Initialising the result image with same dimensions and attributes
         BufferedImage image = new BufferedImage(
                     inpImage.getWidth(),
                     inpImage.getHeight(),
                     BufferedImage.TYPE_INT_RGB);
-        
+
+        // Drawing the original raster onto the resultant BufferImage        
         Graphics2D graphic = image.createGraphics();
         graphic.drawImage(inpImage, 0, 0, Color.WHITE, null);
         
-        // TODO : ??
+        // Initialising the color palette to be used, i.e. 1-bit -> black & white
         Color newBlack = new Color(0,0,0);
         Color newWhite = new Color(255,255,255);
                 
-        for (int i = 0; i < image.getWidth(); i+=2) {   // Using a 2x2 matrix for dithering
+        // Iterating over every 2*2 matrix or "cell" present in the picture
+        for (int i = 0; i < image.getWidth(); i+=2) {
             for (int j = 0; j < image.getHeight(); j+=2) {
                 
+                // Getting all pixel values in the "cell"
                 Color c1 = new Color(image.getRGB(i, j));
                 Color c2 = new Color(image.getRGB(i+1, j));
                 Color c3 = new Color(image.getRGB(i, j+1));
                 Color c4 = new Color(image.getRGB(i+1, j+1));
                 
+                // Since the input is the grayscale version produced in the previous step,
+                // It has equivalent R, G, B values -> example (230,230,230) [almost white]
                 var p1 = c1.getRed();
                 var p2 = c2.getRed();
                 var p3 = c3.getRed();
                 var p4 = c4.getRed();
                 
+                // Calculating black_prcnt by subtracting the average from 256 (could be 255, not much of a difference tbh)
                 var avg = 256 - (p1+p2+p3+p4)/4;
                 
+                // Conditions for setting the pixels to black or white as mentioned
                 if(avg > 0)
                     image.setRGB(i+1, j+1, newBlack.getRGB());
                 else
@@ -166,118 +222,146 @@ public class MirlonBmp extends javax.swing.JFrame {
                     image.setRGB(i, j+1, newWhite.getRGB());
             }
         }
-        
+        // Return resultant BufferedImage
         return image;
     }
    
     public BufferedImage applyLevels(BufferedImage image){
+        /*
         
+        Public funtion to Equalise the levels of R,G,B pixels in the image,
+        It stretches out the histogram to fit the max range we can have i.e. 0-255
+        It works on a complex thresholding algorithm using the cumulative histogram and total count of pixels
+        
+        TL; DR: Basically simulates High Dynamic Range by distributing the different colors all the way from 0-255
+        
+        */
+        
+        // Calculating Total Pixels
         int N = image.getWidth();
         int M = image.getHeight();
         int totPix = N*M;
         
+        // Initialising the result image with same dimensions and attributes
         BufferedImage result = new BufferedImage(
                     image.getWidth(),
                     image.getHeight(),
                     BufferedImage.TYPE_INT_RGB);
         
+        // Drawing the original raster onto the resultant BufferImage        
         Graphics2D graphic = result.createGraphics();
         graphic.drawImage(image, 0, 0, Color.WHITE, null);
         
         // Creating Histogram & Cumulative Histogram Array
+        
         // Red
         int H_r[] = new int[256];
         int CH_r[] = new int[256];
+        
         // Green
         int H_g[] = new int[256];
         int CH_g[] = new int[256];
+        
         // Blue
         int H_b[] = new int[256];
         int CH_b[] = new int[256];
         
-        // Creating Threshold Array
+        // Creating Threshold Arrays
         float T_r[] = new float[256];
         float T_g[] = new float[256];
         float T_b[] = new float[256];
         
-        // Filling the array
+        // Calculating Histogram arrays for R, G and B respectively
         for (int i = 0; i < image.getWidth(); i++) {
             for (int j = 0; j < image.getHeight(); j++) {
                 
+                // Getting RGB Values
                 Color pxCol = new Color(image.getRGB(i,j ));
                 
-                // For Red Channel
                 int r = pxCol.getRed();
                 int g = pxCol.getGreen();
                 int b = pxCol.getBlue();
                 
-                System.out.println(" > Coords : " + "(" + i + "," + j + ") | R: " + r + " | G: " + g + " | B: " + b);
+                //System.out.println(" > Coords : " + "(" + i + "," + j + ") | R: " + r + " | G: " + g + " | B: " + b);
                 
-                // Incrementing values in Histogram Array
+                // Incrementing corresponding values in Histogram Array
                 H_r[r] += 1;
                 H_g[g] += 1;
                 H_b[b] += 1;
             }
         }
         
-        // Developing Cumulative Histogram
+        // Assigning Initial values for Cumulative Histograms
         CH_r[0] = H_r[0];
         CH_g[0] = H_g[0];
         CH_b[0] = H_b[0];
 
-        
+        // Calculating Cumulative Histogram by adding the previous value to the current value
         for(int x = 1; x < 256; x++){
             CH_r[x] = CH_r[x-1] + H_r[x];
             CH_g[x] = CH_g[x-1] + H_g[x];
             CH_b[x] = CH_b[x-1] + H_b[x];            
         }
         
-        // Calculating threshold array
+        // Calculating threshold arrays for R,G,B
         for(int i = 0; i < 256; i++){
             T_r[i] = (float)((CH_r[i] * 255.0)/(float)totPix);
             T_g[i] = (float)((CH_g[i] * 255.0)/(float)totPix);
             T_b[i] = (float)((CH_b[i] * 255.0)/(float)totPix);            
         }
         
+        // Iterating over all pixels in the image and setting corresponding threshold values to the pixels
         for(int i = 0; i < result.getWidth(); i++){
             for(int j = 0; j < result.getHeight(); j++){
                 
+                // Getting R,G,B values
                 Color pxCol = new Color(image.getRGB(i,j ));
                 
                 int r = pxCol.getRed();
                 int g = pxCol.getGreen();
                 int b = pxCol.getBlue();
                 
+                // Calculating new R,G,B Values
                 int rVal = (int) T_r[r];
                 int gVal = (int) T_g[g];
                 int bVal = (int) T_b[b];
                 
+                // Initialising new Color with the new calculated values
                 Color newCol = new Color(rVal, gVal, bVal);
+                
+                // Setting each individual pixel to the calculated "HDR" values
                 result.setRGB(i, j, newCol.getRGB());
             }
         }
         
+        // Return resultant BufferedImage        
         return result;
     }
     
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // Choose Button triggers the entire code, when an image is selected
+        System.out.println(evt); // to avoid warnings
         
-        System.out.println(evt);
+        // Setting text to the Action Buttons
+        prevBtn.setText("<"); // Previous
+        nxtBtn.setText(">");  // Next
+        exitBtn.setText("X"); // Exit
         
-        prevBtn.setText("<");
-        nxtBtn.setText(">");
-        exitBtn.setText("x");
-        
+        // Y-axis box layout for the action buttons panel
         btnPanel.setLayout(new BoxLayout(btnPanel, BoxLayout.Y_AXIS));
         
+        // adding buttons to the Panel
         btnPanel.add(exitBtn);
         btnPanel.add(prevBtn);
         btnPanel.add(nxtBtn);
         
+        // Initiate File Chooser
         int returnVal = fileDialog.showOpenDialog(this);
         
+        // Editor Frame is the main Image Display frame - setting default close to exit
         editorFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
      
+        // If a BMP file is selected and approved
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileDialog.getSelectedFile();
             
@@ -288,15 +372,19 @@ public class MirlonBmp extends javax.swing.JFrame {
                 System.out.print(" > Original | Grayscale | Flag = ");
                 System.out.println(flag);
                 
+                // Reading the selected BMP to BufferedImage
                 BufferedImage selImg = ImageIO.read(selectedFile);
                 ImageIcon imageIcon = new ImageIcon(selImg);
                 
-                BufferedImage grayImg = turnImgGrayscale(selImg);
+                // Applying Grayscale
+                BufferedImage grayImg = applyGrayscale(selImg);
                 ImageIcon grayImgIcon = new ImageIcon(grayImg);
                 
+                // Apply 2*2 Ordered Dithering
                 BufferedImage ditheredImg = applyDithering(grayImg);
                 ImageIcon ditheredIcon = new ImageIcon(ditheredImg);
                 
+                // Apply Auto-Levels
                 BufferedImage lvldImg = applyLevels(selImg);
                 ImageIcon lvldIcon = new ImageIcon(lvldImg);
                 
@@ -310,9 +398,11 @@ public class MirlonBmp extends javax.swing.JFrame {
 //                System.out.println(exCol.getGreen());
 //                System.out.print("B:");
 //                System.out.println(exCol.getBlue());
-
+                
+                // Hide choose file dialog
                 this.setVisible(false);
                 
+                // Show editorFrame - i.e. main image viewer
                 editorFrame.setTitle("Image Viewer - Original | Grayscale (1)");
                 
                 jLabel1.setIcon(imageIcon);
@@ -334,6 +424,7 @@ public class MirlonBmp extends javax.swing.JFrame {
                 
                 editorFrame.setVisible(true);
                 
+                // add ActionEvent to the next button
                 nxtBtn.addActionListener((ActionEvent e) -> {
                     flag++;
                     
@@ -372,6 +463,7 @@ public class MirlonBmp extends javax.swing.JFrame {
                     }
                 });
                 
+                // add ActionEvent to the previous button
                 prevBtn.addActionListener((ActionEvent e) -> {
                     flag--;
                     
@@ -418,6 +510,7 @@ public class MirlonBmp extends javax.swing.JFrame {
                     }
                 });
                 
+                // add ActionEvent to the exit button
                 exitBtn.addActionListener((ActionEvent e) -> {
                     System.out.println(" > Exit Button Pressed.");
                     System.exit(0);
