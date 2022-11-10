@@ -16,7 +16,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 /**
  *
- * @author Jaynam Modi (https://github.com/jaynammodi/bitmap-advanced-processing)
+ * @author Mirlon
  */
 public class MirlonBmp extends javax.swing.JFrame {
 
