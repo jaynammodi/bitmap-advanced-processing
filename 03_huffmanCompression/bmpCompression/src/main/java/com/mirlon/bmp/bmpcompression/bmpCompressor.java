@@ -121,11 +121,13 @@ public class bmpCompressor extends javax.swing.JFrame {
                 
                 float originalSize = selectedFile.length();
                 float h1Size = huffmanCompression.beginHCompression(selectedFile.getAbsolutePath());
-                float h1cr = h1Size / originalSize;
+                float h1cr = originalSize / h1Size;
+                float j2Size = jpegLossless.beginJCompression(selectedFile);
+                float j2cr = originalSize / j2Size;
                 
                 jLabel1.setText("");
                 jLabel1.setIcon(imageIcon);
-                jTextArea1.setText(" * " + selectedFile.getName() + "\n > Huffman Encoding (1) \n > Original Size: " + originalSize + " bytes \n > Compressed Size: " + h1Size + " bytes \n > Compression Ratio: " + h1cr);
+                jTextArea1.setText(" * " + selectedFile.getName() + "\n > Original Size: " + originalSize + " bytes" + "\n (1) Huffman Encoding \n > Compressed Size: " + h1Size + " bytes \n > Compression Ratio: " + h1cr + ":1 \n (2) JPEG Lossless + Huffman \n > Compressed Size: " + j2Size + " bytes \n > Compression Ratio: " + j2cr + ":1");
             } catch (IOException e){
                 System.out.println(" > Unable to read BMP");
             }
