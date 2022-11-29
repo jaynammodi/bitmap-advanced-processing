@@ -338,6 +338,6 @@ public class huffmanCompression {
 		if (cnt > 1)
 			dfs(Root, ""); // dfs to make the codes
 		fakezip(arg1); // fake zip file which will have the binary of the input\
-		return realzip("fakezipped.txt", arg1 + ".huffman1"); // making the real zip
+		return realzip("fakezipped.txt", arg1 + ".huffman.bmp"); // making the real zip
 	}
 }
