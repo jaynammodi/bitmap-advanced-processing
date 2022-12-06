@@ -12,7 +12,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 /**
  *
- * @author jaynam
+ * @author 
  */
 public class bmpCompressor extends javax.swing.JFrame {
 
@@ -129,7 +129,7 @@ public class bmpCompressor extends javax.swing.JFrame {
                 
                 jLabel1.setText("");
                 jLabel1.setIcon(imageIcon);
-                jTextArea1.setText(" * " + selectedFile.getName() + "\n > Original Size: " + originalSize + " bytes" + "\n (1) Huffman Encoding \n > Output: " + selectedFile.getAbsolutePath() + ".huffman.bmp \n > Compressed Size: " + h1Size + " bytes \n > Compression Ratio: " + h1cr + ":1 \n (2) JPEG Lossless + Huffman \n > Output:" + selectedFile.getAbsolutePath() + ".ljpeg \n > Compressed Size: " + j2Size + " bytes \n > Compression Ratio: " + j2cr + ":1");
+                jTextArea1.setText(" * " + selectedFile.getName() + "\n > Original Size: " + originalSize + " bytes" + "\n (1) Huffman Encoding \n > Output: " + selectedFile.getName() + ".huffman.bmp \n > Compressed Size: " + h1Size + " bytes \n > Compression Ratio: " + h1cr + ":1 \n (2) JPEG Lossless + Huffman \n > Output:" + selectedFile.getName() + ".ljpeg \n > Compressed Size: " + j2Size + " bytes \n > Compression Ratio: " + j2cr + ":1");
             } catch (IOException e){
                 System.out.println(" > Unable to read BMP");
             }

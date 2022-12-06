@@ -16,7 +16,7 @@ import java.util.PriorityQueue;
 
 /**
  *
- * @author jaynam
+ * @author 
  */
 public class huffmanCompression {
     static PriorityQueue<TREE> pq = new PriorityQueue<>();
@@ -26,6 +26,7 @@ public class huffmanCompression {
     static byte bt;
     static int cnt; 
     
+    // Binary Tree Implementation
     static class TREE implements Comparable<TREE> {
 		TREE Lchild;
 		TREE Rchild;
@@ -44,6 +45,7 @@ public class huffmanCompression {
 
 	static TREE Root;
         
+        // Huffman Encoding Frequency Calculation, reading the binary file and calculating the character frequency table
         public static void CalFreq(String fname) {
 		File file = null;
 		Byte bt;
@@ -70,6 +72,8 @@ public class huffmanCompression {
 		file = null;
 	}
         
+        // Utility Functions
+        
         public static int to(Byte b) {
 		int ret = b;
 		if (ret < 0) {
@@ -93,10 +97,7 @@ public class huffmanCompression {
 		pq.clear();
 	}
 
-	/**********************************************************************************/
-	/**********************************************************************************
-	 * dfs to free memory
-	 *********************************************************************************/
+	// DFS through the Huffman Tree to clean up
 	public static void fredfs(TREE now) {
 
 		if (now.Lchild == null && now.Rchild == null) {
@@ -109,11 +110,7 @@ public class huffmanCompression {
 			fredfs(now.Rchild);
 	}
 
-	/**********************************************************************************/
-
-	/**********************************************************************************
-	 * dfs to make the codes
-	 *********************************************************************************/
+	// DFS to generate Huffman Encoding
 	public static void dfs(TREE now, String st) {
 		now.deb = st;
 		if ((now.Lchild == null) && (now.Rchild == null)) {
@@ -126,11 +123,7 @@ public class huffmanCompression {
 			dfs(now.Rchild, st + "1");
 	}
 
-	/**********************************************************************************/
-
-	/*******************************************************************************
-	 * Making all the nodes in a priority Q making the tree
-	 *******************************************************************************/
+	// Generating the nodes of the priority queue using all the leaves of the tree
 	public static void MakeNode() {
 		int i;
 		pq.clear();
@@ -174,43 +167,7 @@ public class huffmanCompression {
 		Root = pq.poll();
 	}
 
-	/*******************************************************************************/
-
-	/*******************************************************************************
-	 * encrypting
-	 *******************************************************************************/
-//	public static void encrypt(String fname) {
-//		File file = null;
-//
-//		file = new File(fname);
-//		try {
-//			FileInputStream file_input = new FileInputStream(file);
-//			DataInputStream data_in = new DataInputStream(file_input);
-//			while (true) {
-//				try {
-//
-//					bt = data_in.readByte();
-//					freq[bt]++;
-//				} catch (EOFException eof) {
-//					System.out.println("End of File");
-//					break;
-//				}
-//			}
-//			file_input.close();
-//			data_in.close();
-//
-//		} catch (IOException e) {
-//			System.out.println("IO Exception =: " + e);
-//		}
-//		file = null;
-//	}
-
-	/*******************************************************************************/
-
-	/*******************************************************************************
-	 * fake zip creates a file "fakezip.txt" where puts the final binary codes
-	 * of the real zipped file
-	 *******************************************************************************/
+        // generating a fake storage file to write the Huffman Encoded Contents
 	public static void fakezip(String fname) {
 
 		File filei, fileo;
@@ -245,11 +202,7 @@ public class huffmanCompression {
 
 	}
 
-	/*******************************************************************************/
-
-	/*******************************************************************************
-	 * real zip according to codes of fakezip.txt (fname)
-	 *******************************************************************************/
+	// Parsing the Huffman Codes from the fakezipped to generate huffman encoded BMP and return Size after Compression
 	public static long realzip(String fname, String fname1) {
 		File filei, fileo;
 		int i, j = 10;
@@ -337,7 +290,7 @@ public class huffmanCompression {
 		MakeNode(); // makeing corresponding nodes
 		if (cnt > 1)
 			dfs(Root, ""); // dfs to make the codes
-		fakezip(arg1); // fake zip file which will have the binary of the input\
-		return realzip("fakezipped.txt", arg1 + ".huffman.bmp"); // making the real zip
+		fakezip(arg1); // fake file which will have the binary of the input\
+		return realzip("fakezipped.txt", arg1 + ".huffman.bmp"); // making the real file
 	}
 }

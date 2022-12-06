@@ -26,8 +26,13 @@ import com.aspose.imaging.imageoptions.PngOptions;
 
 /*
  *
- * @author jaynam
+ * @author 
  */
+
+// the Aspose Imaging Library for JAI allows users to work with more input files and the required compression models,
+// this class implements Lossless JPEG Compression from the Java Advanced Imaging package in order to compress the 
+// given .bmp to a .ljpeg with lossless jpeg compression and returns the size of the file post compression.
+
 public class jpegLossless {
     public static long beginJCompression(File selectedBmp) {
         File ofile = new File(selectedBmp.getAbsolutePath() + ".ljpeg");
