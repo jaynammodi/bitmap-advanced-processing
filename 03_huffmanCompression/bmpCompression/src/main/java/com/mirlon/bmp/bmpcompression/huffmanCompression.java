@@ -168,53 +168,20 @@ public class huffmanCompression {
 	}
 
         // generating a fake storage file to write the Huffman Encoded Contents
-	public static void fakezip(String fname) {
+	public static long buildHBmp(String fname) {
 
 		File filei, fileo;
 		int i;
+                Byte btt;
+
 
 		filei = new File(fname);
-		fileo = new File("fakezipped.txt");
+		fileo = new File(fname + ".huffman.bmp");
 		try {
 			FileInputStream file_input = new FileInputStream(filei);
 			DataInputStream data_in = new DataInputStream(file_input);
 			PrintStream ps = new PrintStream(fileo);
-
-			while (true) {
-				try {
-					bt = data_in.readByte();
-					ps.print(ss[to(bt)]);
-				} catch (EOFException eof) {
-					System.out.println(" > Encountered End of File");
-					break;
-				}
-			}
-
-			file_input.close();
-			data_in.close();
-			ps.close();
-
-		} catch (IOException e) {
-			System.out.println(" > fakezip IO Exception =: " + e);
-		}
-		filei = null;
-		fileo = null;
-
-	}
-
-	// Parsing the Huffman Codes from the fakezipped to generate huffman encoded BMP and return Size after Compression
-	public static long realzip(String fname, String fname1) {
-		File filei, fileo;
-		int i, j = 10;
-		Byte btt;
-
-		filei = new File(fname);
-		fileo = new File(fname1);
-
-		try {
-			FileInputStream file_input = new FileInputStream(filei);
-			DataInputStream data_in = new DataInputStream(file_input);
-			FileOutputStream file_output = new FileOutputStream(fileo);
+                        FileOutputStream file_output = new FileOutputStream(fileo);
 			DataOutputStream data_out = new DataOutputStream(file_output);
 
 			data_out.writeInt(cnt);
@@ -266,9 +233,77 @@ public class huffmanCompression {
 		} catch (IOException e) {
 			System.out.println(" > Realzip IO exception = " + e);
 		}
-		filei.delete();
                 return fileo.length();
-        }
+
+	}
+
+//	// Parsing the Huffman Codes from the fakezipped to generate huffman encoded BMP and return Size after Compression
+//	public static long realzip(String fname, String fname1) {
+//		File filei, fileo;
+//		int i, j = 10;
+//		Byte btt;
+//
+//		filei = new File(fname);
+//		fileo = new File(fname1);
+//
+//		try {
+//			FileInputStream file_input = new FileInputStream(filei);
+//			DataInputStream data_in = new DataInputStream(file_input);
+//			FileOutputStream file_output = new FileOutputStream(fileo);
+//			DataOutputStream data_out = new DataOutputStream(file_output);
+//
+//			data_out.writeInt(cnt);
+//			for (i = 0; i < 256; i++) {
+//				if (freq[i] != 0) {
+//					btt = (byte) i;
+//					data_out.write(btt);
+//					data_out.writeInt(freq[i]);
+//				}
+//			}
+//			long texbits;
+//			texbits = filei.length() % 8;
+//			texbits = (8 - texbits) % 8;
+//			exbits = (int) texbits;
+//			data_out.writeInt(exbits);
+//			while (true) {
+//				try {
+//					bt = 0;
+//					byte ch;
+//					for (exbits = 0; exbits < 8; exbits++) {
+//						ch = data_in.readByte();
+//						bt *= 2;
+//						if (ch == '1')
+//							bt++;
+//					}
+//					data_out.write(bt);
+//
+//				} catch (EOFException eof) {
+//					int x;
+//					if (exbits != 0) {
+//						for (x = exbits; x < 8; x++) {
+//							bt *= 2;
+//						}
+//						data_out.write(bt);
+//					}
+//
+//					exbits = (int) texbits;
+//					System.out.println(" > Huffman | Extrabits: " + exbits);
+//					System.out.println(" > Encountered End of File");
+//					break;
+//				}
+//			}
+//			data_in.close();
+//			data_out.close();
+//			file_input.close();
+//			file_output.close();
+//			System.out.println(" > Huffman(1) | Output File Size: " + fileo.length());
+//
+//		} catch (IOException e) {
+//			System.out.println(" > Realzip IO exception = " + e);
+//		}
+//		filei.delete();
+//                return fileo.length();
+//        }
 
 	/*******************************************************************************/
 
@@ -290,7 +325,6 @@ public class huffmanCompression {
 		MakeNode(); // makeing corresponding nodes
 		if (cnt > 1)
 			dfs(Root, ""); // dfs to make the codes
-		fakezip(arg1); // fake file which will have the binary of the input\
-		return realzip("fakezipped.txt", arg1 + ".huffman.bmp"); // making the real file
-	}
+		return buildHBmp(arg1); // 
+        }
 }

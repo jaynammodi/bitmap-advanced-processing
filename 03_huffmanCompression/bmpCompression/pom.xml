@@ -11,25 +11,98 @@
         <maven.compiler.target>19</maven.compiler.target>
         <exec.mainClass>com.mirlon.bmp.bmpcompression.BmpCompression</exec.mainClass>
     </properties>
-    <repositories>
-        <repository>
-            <id>AsposeJavaAPI</id>
-            <name>Aspose Java API</name>
-            <url>https://repository.aspose.com/repo/</url>
-        </repository>
-    </repositories>
+ <repositories>
+
+    <repository>
+
+        <id>AsposeJavaAPI</id>
+
+        <name>Aspose Java API</name>
+
+        <url>https://repository.aspose.com/repo/</url>
+
+    </repository>
+
+</repositories>
     <dependencies>
         <dependency>
             <groupId>com.aspose</groupId>
             <artifactId>aspose-imaging</artifactId>
             <version>22.4</version>
             <classifier>jdk16</classifier>
-       </dependency>        <!-- if you need a documentation, please add the following dependency. For example it could be useful for IDE. -->
+       </dependency>
         <dependency>
              <groupId>com.aspose</groupId>
              <artifactId>aspose-imaging</artifactId>
              <version>22.4</version>
              <classifier>javadoc</classifier>
         </dependency>
+      
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-dependency-plugin</artifactId>
+      <version>2.1</version>
+      <executions>
+        <execution>
+          <id>copy-dependencies</id>
+          <phase>package</phase>
+          <goals>
+            <goal>copy-dependencies</goal>
+          </goals>
+          <configuration>
+            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+            <overWriteReleases>false</overWriteReleases>
+            <overWriteSnapshots>false</overWriteSnapshots>
+            <overWriteIfNewer>true</overWriteIfNewer>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-jar-plugin</artifactId>
+      <version>2.4</version>
+      <configuration>
+        <archive>
+          <manifest>
+            <addClasspath>true</addClasspath>
+            <classpathPrefix>lib/</classpathPrefix>
+            <mainClass>$fullqualified path to your main Class</mainClass>
+          </manifest>
+        </archive>
+      </configuration>
+    </plugin>
+            <plugin>
+              <artifactId>maven-assembly-plugin</artifactId>
+              <configuration>
+                <archive>
+                  <manifest>
+                    <mainClass>com.mirlon.bmp.bmpcompression.bmpCompressor</mainClass>
+                  </manifest>
+                </archive>
+                <descriptorRefs>
+                  <descriptorRef>jar-with-dependencies</descriptorRef>
+                </descriptorRefs>
+              </configuration>
+            </plugin>
+          <plugin>
+            <!-- Build an executable JAR -->
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>3.1.0</version>
+            <configuration>
+              <archive>
+                <manifest>
+                  <addClasspath>true</addClasspath>
+                  <classpathPrefix>lib/</classpathPrefix>
+                  <mainClass>com.mirlon.bmp.bmpcompression.bmpCompressor</mainClass>
+                </manifest>
+              </archive>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
 </project>
